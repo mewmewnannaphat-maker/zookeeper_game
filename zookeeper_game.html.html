@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ผจญภัยในสวนสัตว์จิ๋ว - คณิตศาสตร์ ป.3</title>
+    <!-- โหลดฟอนต์ Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #03A9F4;
+            --accent: #FFC107;
+            --danger: #FF5252;
+            --dark: #2c3e50;
+            --light: #f9f9f9;
+        }
+        
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background: linear-gradient(180deg, #81D4FA 0%, #A5D6A7 50%, #81C784 100%); 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden; 
+        }
+
+        .leaf {
+            position: fixed;
+            top: -50px;
+            z-index: 1;
+            pointer-events: none;
+            animation: fall linear infinite;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2));
+        }
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg) translateX(0); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(150px); opacity: 0; }
+        }
+
+        .container { 
+            background: #ffffff; 
+            max-width: 1100px; 
+            width: 100%;
+            margin: 0 auto; 
+            padding: 40px 50px; 
+            border-radius: 40px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2), inset 0 0 0 8px #FFEB3B; 
+            border: 8px solid #FFF;
+            position: relative;
+            z-index: 10; 
+            box-sizing: border-box;
+        }
+
+        h1 { color: #2E7D32; font-size: 42px; font-weight: 900; margin-bottom: 5px; text-shadow: 3px 3px 0px #C8E6C9, 4px 4px 0px rgba(0,0,0,0.1); letter-spacing: 1px; line-height: 1.2;}
+        
+        .question-box { 
+            font-size: 48px; 
+            margin: 25px 0 20px 0; 
+            font-weight: 900; 
+            color: #E65100; 
+            background: #FFF9C4; 
+            padding: 30px; 
+            border-radius: 25px; 
+            border: 5px dashed #FFCA28;
+            box-shadow: 0 10px 20px rgba(255, 202, 40, 0.3), inset 0 5px 10px rgba(255,255,255,0.8);
+            line-height: 1.5; 
+        }
+        .highlight { color: #D32F2F; font-weight: 900; } 
+        
+        .blank-box { display: inline-block; width: 65px; height: 65px; border: 5px solid #29B6F6; background: #E1F5FE; border-radius: 12px; vertical-align: middle; margin: 0 10px; box-shadow: inset 0 4px 6px rgba(0,0,0,0.1); }
+
+        .choice-container { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
+        .choice {
+            background: #E1F5FE; color: #0277BD; font-size: 34px; font-weight: 900; padding: 15px 40px;
+            border-radius: 20px; border: 5px solid #4FC3F7; box-shadow: 0 6px 0 #29B6F6;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-family: 'Prompt', sans-serif;
+        }
+        .choice:hover { background: #B3E5FC; transform: translateY(-4px); box-shadow: 0 10px 0 #29B6F6; }
+        .choice:active, .choice.selected { background: #FF9800; color: #fff; border-color: #EF6C00; box-shadow: 0 2px 0 #EF6C00; transform: translateY(6px); }
+
+        .btn-score-toggle {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            background: #FFCA28;
+            color: #E65100;
+            border: 3px solid #FF9800;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #EF6C00;
+            transition: 0.2s;
+            z-index: 100;
+        }
+        .btn-score-toggle:hover { background: #FFB300; transform: translateY(-2px); box-shadow: 0 7px 0 #EF6C00; }
+        .btn-score-toggle:active { transform: translateY(4px); box-shadow: 0 2px 0 #EF6C00; }
+
+        .score-panel {
+            position: absolute;
+            top: 90px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border: 5px solid #FFC107;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            z-index: 99;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .team-card { 
+            background: white; border: 4px solid #ccc; border-radius: 20px; 
+            padding: 15px; width: 175px; box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+        .team-card.red { border-color: #FF5252; background: #FFEBEE; }
+        .team-card.blue { border-color: #448AFF; background: #E3F2FD; }
+        .team-card.yellow { border-color: #FFC107; background: #FFF8E1; }
+        .team-card.green { border-color: #4CAF50; background: #E8F5E9; }
+        
+        .team-name { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: #37474F; line-height: 1.3; min-height: 45px; display: flex; align-items: center; text-align: center; z-index: 2;}
+        .team-score { font-size: 46px; font-weight: 900; color: #263238; margin: 0 0 12px 0; text-shadow: 2px 2px 0 #fff; line-height: 1; z-index: 2;}
+        
+        .btn-add-star {
+            background: #4CAF50; color: white; font-family: 'Prompt'; font-size: 18px; font-weight: 900;
+            border: none; padding: 10px 15px; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 0 #1e8449; transition: 0.1s; width: 95%; z-index: 2;
+        }
+        .btn-add-star:hover { background: #66BB6A; transform: translateY(-2px); box-shadow: 0 7px 0 #2E7D32; }
+        .btn-add-star:active { transform: translateY(4px); box-shadow: 0 0 0 #1e8449; }
+
+        .train-stage-container { margin: 15px 0 25px 0; padding: 25px; background: #E0F7FA; border-radius: 25px; border: 5px solid #81D4FA; box-shadow: inset 0 5px 15px rgba(0,0,0,0.05); }
+        .animal-row { display: flex; justify-content: center; gap: 30px; margin-bottom: 45px; flex-wrap: wrap; }
+        .animal-item { display: flex; flex-direction: column; align-items: center; transition: 0.5s; }
+        
+        .bubble {
+            background: white; border: 4px solid #FF9800; color: #E65100; font-weight: 900; font-size: 28px;
+            padding: 8px 18px; border-radius: 18px; margin-bottom: 15px; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .bubble::after { 
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 10px 10px 0; border-style: solid; border-color: #FF9800 transparent transparent transparent;
+        }
+        
+        .animal-emoji { font-size: 75px; line-height: 1; z-index: 2; text-shadow: 2px 2px 5px rgba(0,0,0,0.2); transition: 0.3s; }
+        .animal-emoji:hover { transform: scale(1.1) rotate(5deg); }
+        .pedestal { width: 100px; height: 35px; border-radius: 50%; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.2); margin-top: -10px; z-index: 1; border: 3px solid rgba(255,255,255,0.5); }
+
+        .train-track { display: flex; justify-content: center; align-items: flex-end; border-bottom: 10px solid #78909C; padding-bottom: 5px; gap: 10px; flex-wrap: wrap;}
+        .train-engine { font-size: 85px; line-height: 1; margin-right: 5px; transform: scaleX(-1); filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
+        .train-cart {
+            width: 100px; height: 85px; border: 5px solid #37474F; border-radius: 15px 15px 5px 5px;
+            background: #CFD8DC; position: relative; display: flex; justify-content: center; align-items: flex-end;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+        }
+        .train-cart::after { content: '⚫⚫'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 18px; letter-spacing: 12px; }
+        .cart-color-band { position: absolute; bottom: 0; left: 0; width: 100%; height: 22px; border-radius: 0 0 0 0; border-top: 3px solid rgba(0,0,0,0.1); }
+        .animal-in-cart { font-size: 55px; z-index: 2; transform: translateY(5px); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        
+        @keyframes popIn { 0% { transform: scale(0) translateY(30px); opacity: 0; } 100% { transform: scale(1) translateY(5px); opacity: 1; } }
+
+        .btn { 
+            background-color: #FF9800; color: white; border: none; padding: 15px 35px; font-size: 26px; 
+            font-family: 'Prompt', sans-serif; font-weight: 900; border-radius: 50px; cursor: pointer; margin: 10px; box-shadow: 0 6px 0 #E65100; transition: 0.1s;
+        }
+        .btn:hover { background-color: #FFB300; transform: translateY(-2px); box-shadow: 0 8px 0 #E65100; }
+        .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 #E65100; }
+        
+        .btn-home { background-color: #29B6F6; box-shadow: 0 5px 0 #0277BD; font-size: 20px; padding: 10px 25px; }
+        .btn-home:hover { background-color: #4FC3F7; box-shadow: 0 7px 0 #0277BD; }
+        
+        .btn-start { background-color: #FF5252; font-size: 32px; padding: 18px 50px; border-radius: 50px; box-shadow: 0 8px 0 #C62828; animation: pulse 2s infinite; }
+        .btn-start:hover { background: #FF8A80; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .level-badge { background: #4CAF50; color: #fff; padding: 8px 25px; border-radius: 30px; font-size: 22px; font-weight: 900; display: inline-block; margin-bottom: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 3px solid #FFF; }
+        .timer-box { font-size: 28px; font-weight: 900; color: #D32F2F; background: #FFCDD2; padding: 8px 25px; border-radius: 30px; display: inline-block; margin-bottom: 5px; border: 4px solid #D32F2F; box-shadow: 0 4px 0 #B71C1C; }
+
+        #explanation { margin-top: 20px; font-size: 28px; color: #0277BD; font-weight: 900; background: #E1F5FE; padding: 20px; border-radius: 20px; border: 4px solid #81D4FA; display: none; box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .progress { font-size: 20px; color: #546E7A; margin-bottom: 5px; font-weight: 900; background: #ECEFF1; padding: 5px 18px; border-radius: 20px; }
+        
+        .menu-container { display: flex; justify-content: center; gap: 30px; margin-top: 30px; }
+        .card { background: #FFF; border: 5px solid #81C784; padding: 30px; border-radius: 30px; width: 42%; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 12px; background: rgba(255,255,255,0.5); z-index: 1;}
+        .card:hover { background: #F1F8E9; transform: translateY(-8px); border-color: #4CAF50; box-shadow: 0 12px 25px rgba(76,175,80,0.3); }
+        .card h3 { color: #2E7D32; font-size: 34px; margin-top: 0; font-weight: 900; }
+        .card p { font-size: 20px; }
+        
+        .rules-card { background: #FFF9C4; border: 5px solid #FFCA28; padding: 35px; border-radius: 30px; max-width: 850px; margin: 0 auto 30px auto; text-align: left; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .rules-card h3 { color: #E65100; margin-top: 0; font-size: 32px; text-align: center; font-weight: 900;}
+        .rules-card ul { font-size: 24px; line-height: 1.8; margin: 0; padding-left: 30px; font-weight: 600; color: #37474F; }
+
+        #summary-results { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 20px; 
+            max-width: 550px; 
+            margin: 25px auto; 
+        }
+        .summary-card { 
+            width: auto; 
+            padding: 20px; 
+            transform: scale(1);
+            transition: 0.3s;
+        }
+        .summary-card:hover { transform: scale(1.05) rotate(2deg); }
+
+        .hidden { display: none !important; }
+        .bounce-anim { font-size: 80px; margin-bottom: 15px; animation: bounce 2s infinite; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    </style>
+</head>
+<body>
+
+<div id="leaves-container"></div>
+
+<div class="container">
+    
+    <!-- หน้าเริ่มเกม (Start Screen) -->
+    <div id="welcome-screen" style="padding: 30px 0;">
+        <div class="bounce-anim" style="font-size: 110px;">🦁🐵🐘🦒</div>
+        <h1 style="font-size: 60px; color: #E65100; text-shadow: 3px 3px 0px #FFCA28, 6px 6px 0px rgba(0,0,0,0.1);">ผจญภัยในสวนสัตว์จิ๋ว</h1>
+        <h2 style="font-size: 32px; color: #2E7D32; margin-bottom: 50px;">🎮 เกมคณิตศาสตร์สุดมันส์ สำหรับ ป.3 🎮</h2>
+        <button class="btn btn-start" onclick="goToMenu()">▶️ กดเพื่อเริ่มเกม!</button>
+    </div>
+
+    <!-- เลือกด่าน -->
+    <div id="home-screen" class="hidden">
+        <div class="bounce-anim" style="font-size: 65px;">🐊🚂</div>
+        <h1 style="font-size: 45px;">เลือกภารกิจสนุกๆ</h1>
+        
+        <div class="menu-container">
+            <div class="card" onclick="showIntroRules(1)">
+                <div style="font-size: 60px;">🐊</div>
+                <h3>ด่านที่ 1</h3>
+                <p style="font-weight: 600;"><strong>ให้อาหารจระเข้จอมหิว (20 ข้อ)</strong></p>
+                <button class="btn btn-add-star" style="width: auto; padding: 10px 35px; font-size: 22px;">เลือกลุยด่านนี้</button>
+            </div>
+            
+            <div class="card" onclick="showIntroRules(2)">
+                <div style="font-size: 60px;">🚂</div>
+                <h3>ด่านที่ 2</h3>
+                <p style="font-weight: 600;"><strong>จัดขบวนรถไฟสัตว์ (15 ข้อ)</strong></p>
+                <button class="btn btn-add-star" style="width: auto; padding: 10px 35px; font-size: 22px;">เลือกลุยด่านนี้</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- กติกา -->
+    <div id="rules-screen" class="hidden">
+        <h1 id="rules-screen-title" style="color: #E65100; font-size: 45px;">📜 กติกาก่อนเริ่มภารกิจ</h1>
+        <div class="rules-card" id="rules-content-box"></div>
+        <button class="btn btn-home" style="margin: 10px;" onclick="goHome()">🏠 กลับหน้าหลัก</button>
+        <button class="btn btn-start" style="font-size: 26px; padding: 12px 35px;" onclick="startStageFromRules()">🚀 พร้อมแล้ว ลุยเลย!</button>
+    </div>
+
+    <!-- หน้าจอเกม -->
+    <div id="game-screen" class="hidden">
+        
+        <button id="score-toggle-btn" class="btn-score-toggle hidden" onclick="toggleScoreboard()">⭐ กระดานคะแนน</button>
+        
+        <div id="score-panel" class="score-panel hidden">
+            <div class="team-card red">
+                <div class="team-name">🔴 แก๊งสิงโตจอมพลัง</div>
+                <div class="team-score" id="score-red">0</div>
+                <button class="btn-add-star" onclick="addScore('red')">+1 ดาว ⭐</button>
+            </div>
+            <div class="team-card blue">
+                <div class="team-name">🔵 แก๊งเพนกวินแสนซน</div>
+                <div class="team-score" id="score-blue">0</div>
+                <button class="btn-add-star" onclick="addScore('blue')">+1 ดาว ⭐</button>
+            </div>
+            <div class="team-card yellow">
+                <div class="team-name">🟡 แก๊งยีราฟคอยาว</div>
+                <div class="team-score" id="score-yellow">0</div>
+                <button class="btn-add-star" onclick="addScore('yellow')">+1 ดาว ⭐</button>
+            </div>
+            <div class="team-card green">
+                <div class="team-name">🟢 แก๊งช้างน้อยพ่นน้ำ</div>
+                <div class="team-score" id="score-green">0</div>
+                <button class="btn-add-star" onclick="addScore('green')">+1 ดาว ⭐</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <button class="btn btn-home" style="margin:0;" onclick="goHome()">🏠 กลับหน้าเลือกด่าน</button>
+            <div class="progress" id="progress-text" style="margin:0;">ข้อที่ 1 จาก X</div>
+        </div>
+
+        <h1 id="game-title" style="font-size: 36px;">หัวข้อด่าน</h1>
+        
+        <div class="level-badge" id="level-indicator">เลเวล 1: แฝดสลับที่</div>
+        
+        <div id="timer-container" class="hidden">
+            <div class="timer-box" id="timer-display">⏱️ เวลาคิด: 7 วินาที</div>
+        </div>
+
+        <div class="question-box" id="question-display">กำลังโหลดโจทย์...</div>
+        <div id="choices-display" class="hidden"></div>
+
+        <div id="train-stage-display" class="train-stage-container hidden">
+            <div id="animal-roster" class="animal-row"></div>
+            <div id="train-track" class="train-track"></div>
+        </div>
+
+        <div id="action-buttons">
+            <button id="btn-show-answer" class="btn hidden" onclick="showAnswer()">🔍 กดดูเฉลย</button>
+            <button id="btn-next" class="btn btn-start" style="font-size: 26px; padding: 15px 35px;" onclick="nextQuestion()">ข้อถัดไป ➡️</button>
+        </div>
+
+        <div id="explanation"></div>
+    </div>
+
+    <!-- หน้าสรุปผลคะแนนด่าน 2 -->
+    <div id="summary-screen" class="hidden">
+        <div class="bounce-anim" style="font-size: 100px; margin-bottom: 0;">🏆</div>
+        <h1 style="font-size: 52px; color: #E65100;">สรุปคะแนนการแข่งขัน!</h1>
+        <p style="font-size: 26px; color: #2E7D32; font-weight: 800;">ขอเสียงปรบมือให้กับผู้ดูแลสวนสัตว์จิ๋วทุกแก๊งเลยจ้า 👏</p>
+        
+        <div id="summary-results"></div>
+
+        <button class="btn btn-start" style="margin-top: 25px; font-size: 28px; padding: 18px 45px;" onclick="goHome()">🏠 กลับหน้าหลัก</button>
+    </div>
+
+</div>
+
+<script>
+    function createLeaves() {
+        const leavesContainer = document.getElementById('leaves-container');
+        const leafTypes = ['🍃', '🍂', '🌿', '🍁', '🌱'];
+        
+        for (let i = 0; i < 20; i++) {
+            let leaf = document.createElement('div');
+            leaf.className = 'leaf';
+            leaf.innerText = leafTypes[Math.floor(Math.random() * leafTypes.length)];
+            
+            leaf.style.left = Math.random() * 100 + 'vw';
+            leaf.style.animationDuration = (Math.random() * 5 + 5) + 's'; 
+            leaf.style.animationDelay = Math.random() * 5 + 's';
+            leaf.style.fontSize = (Math.random() * 15 + 25) + 'px'; 
+            
+            leavesContainer.appendChild(leaf);
+        }
+    }
+    window.onload = createLeaves;
+
+    let groupScores = { red: 0, blue: 0, yellow: 0, green: 0 };
+
+    function addScore(color) {
+        groupScores[color] += 1;
+        document.getElementById(`score-${color}`).innerText = groupScores[color];
+        
+        let scoreElement = document.getElementById(`score-${color}`);
+        scoreElement.style.transform = "scale(1.3)";
+        scoreElement.style.color = "#FF9800";
+        setTimeout(() => {
+            scoreElement.style.transform = "scale(1)";
+            scoreElement.style.color = "#263238";
+        }, 200);
+    }
+
+    function resetScores() {
+        groupScores = { red: 0, blue: 0, yellow: 0, green: 0 };
+        document.getElementById("score-red").innerText = "0";
+        document.getElementById("score-blue").innerText = "0";
+        document.getElementById("score-yellow").innerText = "0";
+        document.getElementById("score-green").innerText = "0";
+    }
+
+    function toggleScoreboard() {
+        let panel = document.getElementById("score-panel");
+        if (panel.classList.contains("hidden")) {
+            panel.classList.remove("hidden");
+        } else {
+            panel.classList.add("hidden");
+        }
+    }
+
+    const stage1Questions = [
+        { type: "stick", level: "เลเวล 1: แฝดสลับที่", q: "7,999 × 2  [ &nbsp; ? &nbsp; ]  2 × 7,999", ans: "🎯 เฉลย: เครื่องหมายเท่ากับ (=) เพราะตัวเลขเหมือนกันเป๊ะ" },
+        { type: "stick", level: "เลเวล 1: แฝดสลับที่", q: "57 × 88  [ &nbsp; ? &nbsp; ]  88 × 57", ans: "🎯 เฉลย: เครื่องหมายเท่ากับ (=) หน้าตาเหมือนกัน แค่สลับฝั่ง" },
+        { type: "stick", level: "เลเวล 2: ตัดตัวซ้ำทิ้ง", q: "<span class='highlight'>518</span> × 7  [ &nbsp; ? &nbsp; ]  <span class='highlight'>518</span> × 6", ans: "🎯 เฉลย: เครื่องหมายมากกว่า (>) มองข้ามเลข 518 เหลือ 7 กับ 6 (7 ชนะ)" },
+        { type: "stick", level: "เลเวล 2: ตัดตัวซ้ำทิ้ง", q: "2,008 × 5  [ &nbsp; ? &nbsp; ]  2 × <span class='highlight'>2,008</span>", ans: "🎯 เฉลย: เครื่องหมายมากกว่า (>) มองข้าม 2,008 เหลือ 5 สู้กับ 2 (5 ชนะ)" },
+        { type: "stick", level: "เลเวล 2: ตัดตัวซ้ำทิ้ง", q: "<span class='highlight'>2,403</span> × 4  [ &nbsp; ? &nbsp; ]  8 × <span class='highlight'>2,403</span>", ans: "🎯 เฉลย: เครื่องหมายน้อยกว่า (<) มองข้าม 2,403 เหลือแค่ 4 กับ 8 (8 ชนะ)" },
+        { type: "stick", level: "เลเวล 2: ตัดตัวซ้ำทิ้ง", q: "<span class='highlight'>55</span> × 33  [ &nbsp; ? &nbsp; ]  65 × <span class='highlight'>55</span>", ans: "🎯 เฉลย: เครื่องหมายน้อยกว่า (<) มองข้าม 55 เหลือ 33 กับ 65 (65 ชนะ)" },
+        { type: "stick", level: "เลเวล 3: เทียบเป็นคู่", q: "99 × 22  [ &nbsp; ? &nbsp; ]  98 × 20", ans: "🎯 เฉลย: เครื่องหมายมากกว่า (>) เพราะ 99 ชนะ 98 และ 22 ก็ชนะ 20" },
+        { type: "stick", level: "เลเวล 3: เทียบเป็นคู่", q: "82 × 15  [ &nbsp; ? &nbsp; ]  83 × 16", ans: "🎯 เฉลย: เครื่องหมายน้อยกว่า (<) ฝั่งขวา 83 และ 16 เยอะกว่าทุกตัว" },
+        { type: "stick", level: "เลเวล 4: บอสหลอกตา", q: "73 × 12  [ &nbsp; ? &nbsp; ]  37 × 11", ans: "🎯 เฉลย: เครื่องหมายมากกว่า (>) ฝั่งซ้าย 70 กว่าๆ ฝั่งขวา 30 กว่า" },
+        { type: "stick", level: "เลเวล 4: บอสหลอกตา", q: "4,300 × 8  [ &nbsp; ? &nbsp; ]  4,318 × 9", ans: "🎯 เฉลย: เครื่องหมายน้อยกว่า (<) ฝั่งขวา (4,318 กับ 9) เยอะกว่าทั้งคู่" },
+        
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "26 × 20 &nbsp; < &nbsp; 26 × <span class='blank-box'></span>", choices: ["A) 15", "B) 20", "C) 30"], ans: "🎯 เฉลย: ตอบ C) 30 เพราะเครื่องหมายอ้าปากไปทางขวา ฝั่งขวาต้องมากกว่า 20" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "<span class='blank-box'></span> × 99 &nbsp; = &nbsp; 99 × 48", choices: ["A) 48", "B) 99", "C) 0"], ans: "🎯 เฉลย: ตอบ A) 48 กฎการสลับที่การคูณ หน้าตาต้องเหมือนกัน!" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "1,379 × 6 &nbsp; > &nbsp; <span class='blank-box'></span> × 1,379", choices: ["A) 5", "B) 6", "C) 7"], ans: "🎯 เฉลย: ตอบ A) 5 ฝั่งซ้ายมากกว่า (ชนะ) ฝั่งขวาเลยต้องใช้น้อยกว่า 6" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "63 × <span class='blank-box'></span> &nbsp; = &nbsp; 78 × 63", choices: ["A) 63", "B) 78", "C) 100"], ans: "🎯 เฉลย: ตอบ B) 78 เป็นเครื่องหมายเท่ากับ (สลับที่กันได้เลย)" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "375 × 8 &nbsp; > &nbsp; 375 × <span class='blank-box'></span>", choices: ["A) 9", "B) 8", "C) 7"], ans: "🎯 เฉลย: ตอบ C) 7 ฝั่งซ้ายแข็งแกร่งกว่า ฝั่งขวาต้องน้อยกว่า 8" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "<span class='blank-box'></span> × 3,200 &nbsp; < &nbsp; 3,200 × 5", choices: ["A) 4", "B) 5", "C) 6"], ans: "🎯 เฉลย: ตอบ A) 4 ฝั่งขวาชนะ ฝั่งซ้ายต้องน้อยกว่า 5" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "13 × 78 &nbsp; < &nbsp; <span class='blank-box'></span> × 78", choices: ["A) 10", "B) 13", "C) 15"], ans: "🎯 เฉลย: ตอบ C) 15 จระเข้งับฝั่งขวา ฝั่งขวาต้องมากกว่า 13" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "35 × <span class='blank-box'></span> &nbsp; = &nbsp; 53 × 35", choices: ["A) 35", "B) 53", "C) 88"], ans: "🎯 เฉลย: ตอบ B) 53 สลับที่กันง่ายๆ เลย!" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "461 × 12 &nbsp; > &nbsp; <span class='blank-box'></span> × 461", choices: ["A) 13", "B) 12", "C) 11"], ans: "🎯 เฉลย: ตอบ C) 11 ฝั่งซ้ายอ้าปากกว้างกว่า ฝั่งขวาต้องน้อยกว่า 12" },
+        { type: "choice", level: "บอสพิเศษ: ตามหาตัวเลข", q: "23 × 66 &nbsp; < &nbsp; 32 × <span class='blank-box'></span>", choices: ["A) 66", "B) 10", "C) 0"], ans: "🎯 เฉลย: ตอบ A) 66 ฝั่งขวา 32 ชนะ 23 แน่นอน" }
+    ];
+
+    // ข้อมูลโจทย์ด่าน 2 อัปเดตใหม่ 15 ข้อ ไล่ระดับความยาก
+    const stage2Questions = [
+        { type: "train", level: "เลเวล 1: เรียงน้อยไปมาก (แก๊งป่าไม้)", 
+          items: [{a: "🐼", c: "#FF5252", q: "15 × 32"}, {a: "🐸", c: "#448AFF", q: "32 × 13"}, {a: "🦊", c: "#FFC107", q: "18 × 32"}], 
+          ansOrder: [1, 0, 2], ans: "🚂 สีตั๋ว: ฟ้า(13) ➔ แดง(15) ➔ เหลือง(18) <br>[มองข้ามเลข 32 แล้วดูตัวเลขที่เหลือ]" },
+        { type: "train", level: "เลเวล 1: เรียงน้อยไปมาก (แก๊งสัตว์เลี้ยง)", 
+          items: [{a: "🐶", c: "#FF5252", q: "25 × 44"}, {a: "🐱", c: "#448AFF", q: "44 × 10"}, {a: "🐰", c: "#FFC107", q: "44 × 30"}], 
+          ansOrder: [1, 0, 2], ans: "🚂 สีตั๋ว: ฟ้า(10) ➔ แดง(25) ➔ เหลือง(30) <br>[มองข้ามเลข 44]" },
+        { type: "train", level: "เลเวล 2: เรียงน้อยไปมาก (แก๊งนักล่า)", 
+          items: [{a: "🐻", c: "#FF5252", q: "8 × 1,516"}, {a: "🐨", c: "#448AFF", q: "1,516 × 3"}, {a: "🐯", c: "#FFC107", q: "6 × 1,516"}, {a: "🦁", c: "#4CAF50", q: "1,516 × 5"}], 
+          ansOrder: [1, 3, 2, 0], ans: "🚂 สีตั๋ว: ฟ้า(3) ➔ เขียว(5) ➔ เหลือง(6) ➔ แดง(8)" },
+        { type: "train", level: "เลเวล 2: เรียงน้อยไปมาก (แก๊งฟาร์ม)", 
+          items: [{a: "🐷", c: "#FF5252", q: "42 × 18"}, {a: "🐮", c: "#448AFF", q: "42 × 17"}, {a: "🐵", c: "#FFC107", q: "21 × 42"}, {a: "🐔", c: "#4CAF50", q: "16 × 42"}], 
+          ansOrder: [3, 1, 0, 2], ans: "🚂 สีตั๋ว: เขียว(16) ➔ ฟ้า(17) ➔ แดง(18) ➔ เหลือง(21)" },
+        { type: "train", level: "เลเวล 3: ไซเรน! เรียงมากไปน้อย (แก๊งซาฟารี)", 
+          items: [{a: "🦛", c: "#FF5252", q: "84 × 31"}, {a: "🦏", c: "#448AFF", q: "40 × 84"}, {a: "🦍", c: "#FFC107", q: "84 × 35"}], 
+          ansOrder: [1, 2, 0], ans: "🚨 สีตั๋ว: ฟ้า(40) ➔ เหลือง(35) ➔ แดง(31) <br>[คำสั่งสลับ! หาตัวที่มากที่สุดมาวางก่อน]" },
+        { type: "train", level: "เลเวล 3: เรียงมากไปน้อย (แก๊งทะเลทราย)", 
+          items: [{a: "🦓", c: "#FF5252", q: "55 × 99"}, {a: "🐫", c: "#448AFF", q: "99 × 88"}, {a: "🦘", c: "#FFC107", q: "22 × 99"}], 
+          ansOrder: [1, 0, 2], ans: "🚨 สีตั๋ว: ฟ้า(88) ➔ แดง(55) ➔ เหลือง(22)" },
+        { type: "train", level: "เลเวล 3: เรียงมากไปน้อย (แก๊งมีปีก)", 
+          items: [{a: "🦉", c: "#FF5252", q: "1,902 × 6"}, {a: "🦅", c: "#448AFF", q: "9 × 1,902"}, {a: "🦆", c: "#FFC107", q: "1,902 × 7"}, {a: "🦚", c: "#4CAF50", q: "3 × 1,902"}], 
+          ansOrder: [1, 2, 0, 3], ans: "🚨 สีตั๋ว: ฟ้า(9) ➔ เหลือง(7) ➔ แดง(6) ➔ เขียว(3)" },
+        { type: "train", level: "เลเวล 3: เรียงมากไปน้อย (แก๊งสี่ขา)", 
+          items: [{a: "🐺", c: "#FF5252", q: "7 × 333"}, {a: "🐗", c: "#448AFF", q: "333 × 2"}, {a: "🐴", c: "#FFC107", q: "8 × 333"}, {a: "🦄", c: "#4CAF50", q: "333 × 5"}], 
+          ansOrder: [2, 0, 3, 1], ans: "🚨 สีตั๋ว: เหลือง(8) ➔ แดง(7) ➔ เขียว(5) ➔ ฟ้า(2)" },
+        { type: "train", level: "เลเวล 4: บอสใหญ่ เรียงมากไปน้อย (แก๊งสัตว์น้ำ)", 
+          items: [{a: "🐳", c: "#FF5252", q: "95 × 90"}, {a: "🐬", c: "#448AFF", q: "15 × 12"}, {a: "🦭", c: "#FFC107", q: "85 × 82"}, {a: "🐧", c: "#4CAF50", q: "25 × 22"}], 
+          ansOrder: [0, 2, 3, 1], ans: "👑 สีตั๋ว: แดง(หนักสุด) ➔ เหลือง ➔ เขียว ➔ ฟ้า(เบาสุด)" },
+        { type: "train", level: "เลเวล 4: บอสใหญ่ตัวจริง (แก๊งไดโนเสาร์)", 
+          items: [{a: "🦖", c: "#FF5252", q: "90 × 72"}, {a: "🦕", c: "#448AFF", q: "12 × 60"}, {a: "🦣", c: "#FFC107", q: "80 × 63"}, {a: "🦤", c: "#4CAF50", q: "23 × 70"}], 
+          ansOrder: [0, 2, 3, 1], ans: "👑 สีตั๋ว: แดง(90x72) ➔ เหลือง(80x63) ➔ เขียว(23x70) ➔ ฟ้า(12x60)" },
+          
+        /* --- เพิ่ม 5 ข้อใหม่ ระดับ 5-6 --- */
+        { type: "train", level: "เลเวล 4: บอสใหญ่ เรียงน้อยไปมาก (แก๊งนกเพนกวิน)", 
+          items: [{a: "🐧", c: "#FF5252", q: "45 × 50"}, {a: "🐦", c: "#448AFF", q: "48 × 40"}, {a: "🐤", c: "#FFC107", q: "50 × 50"}, {a: "🦢", c: "#4CAF50", q: "42 × 45"}], 
+          ansOrder: [3, 1, 0, 2], ans: "👑 สีตั๋ว: เขียว(1890) ➔ ฟ้า(1920) ➔ แดง(2250) ➔ เหลือง(2500) <br>[บอสใหญ่: กะประมาณค่าทีละตัว]" },
+        { type: "train", level: "เลเวล 5: บอสลับ เรียงมากไปน้อย (แก๊งสัตว์เลื้อยคลาน)", 
+          items: [{a: "🐢", c: "#FF5252", q: "105 × 8"}, {a: "🐍", c: "#448AFF", q: "200 × 5"}, {a: "🦎", c: "#FFC107", q: "150 × 6"}, {a: "🐊", c: "#4CAF50", q: "120 × 8"}], 
+          ansOrder: [1, 3, 2, 0], ans: "🔥 สีตั๋ว: ฟ้า(1000) ➔ เขียว(960) ➔ เหลือง(900) ➔ แดง(840)" },
+        { type: "train", level: "เลเวล 5: บอสลับ เรียงน้อยไปมาก (แก๊งแมลงจิ๋ว)", 
+          items: [{a: "🦋", c: "#FF5252", q: "25 × 25"}, {a: "🐛", c: "#448AFF", q: "24 × 26"}, {a: "🐝", c: "#FFC107", q: "20 × 30"}, {a: "🐞", c: "#4CAF50", q: "22 × 28"}], 
+          ansOrder: [2, 3, 1, 0], ans: "🔥 สีตั๋ว: เหลือง(600) ➔ เขียว(616) ➔ ฟ้า(624) ➔ แดง(625) <br>[บอสลับ: คู่เลขใกล้กันคูณกันจะยิ่งได้ผลลัพธ์มาก!]" },
+        { type: "train", level: "เลเวล 6: บอสตำนาน เรียงมากไปน้อย (แก๊งมังกร)", 
+          items: [{a: "🐲", c: "#FF5252", q: "80 × 50"}, {a: "🐉", c: "#448AFF", q: "75 × 60"}, {a: "🦇", c: "#FFC107", q: "90 × 40"}, {a: "🦅", c: "#4CAF50", q: "85 × 45"}], 
+          ansOrder: [1, 0, 3, 2], ans: "🌟 สีตั๋ว: ฟ้า(4500) ➔ แดง(4000) ➔ เขียว(3825) ➔ เหลือง(3600)" },
+        { type: "train", level: "เลเวล 6: บอสตำนาน เรียงน้อยไปมาก (แก๊งอวกาศ)", 
+          items: [{a: "👽", c: "#FF5252", q: "123 × 10"}, {a: "🤖", c: "#448AFF", q: "110 × 12"}, {a: "👾", c: "#FFC107", q: "105 × 11"}, {a: "👻", c: "#4CAF50", q: "130 × 9"}], 
+          ansOrder: [2, 3, 0, 1], ans: "🌟 สีตั๋ว: เหลือง(1155) ➔ เขียว(1170) ➔ แดง(1230) ➔ ฟ้า(1320) <br>[บอสตำนาน: คิดเลขขบวนรถไฟอย่างใจเย็นนะ!]" }
+    ];
+
+    let currentStage = 1;
+    let currentIndex = 0;
+    let activeQuestions = [];
+    let timerInterval = null;
+    let timeLeft = 7;
+
+    const stageRulesHTML = {
+        1: `<h3>🐊 กติกาด่านที่ 1: ให้อาหารจระเข้จอมหิว</h3>
+            <ul>
+                <li><strong>ข้อ 1-10:</strong> ใช้ตาเปล่าหาเลขซ้ำ ชู <strong>"ไม้ไอติมจระเข้"</strong> (เวลาคิด 7 วิ)</li>
+                <li><strong>ข้อ 11-20:</strong> มีตัวเลือก A, B, C ให้เด็กๆ ช่วยกัน <strong>ตะโกนตอบพร้อมกัน!</strong> (ไม่จับเวลา)</li>
+            </ul>`,
+        2: `<h3>🚂 กติกาด่านที่ 2: จัดขบวนรถไฟสัตว์พาเหรด</h3>
+            <ul>
+                <li><strong>การแบ่งกลุ่ม:</strong> นั่งประจำกลุ่ม (สิงโตแดง, เพนกวินฟ้า, ยีราฟเหลือง, ช้างเขียว)</li>
+                <li><strong>กฎการเล่น:</strong> ดูโจทย์บนหัวสัตว์แต่ละตัว แล้วนำตั๋วสีมาวางเรียงบนโต๊ะกลุ่มตัวเอง</li>
+                <li><strong>ระวังคำสั่ง:</strong> สังเกตให้ดีว่าโจทย์สั่งให้เรียงจาก <em>"น้อยไปมาก"</em> หรือ <em>"มากไปน้อย"</em></li>
+                <li>กลุ่มไหนเสร็จก่อนและถูกต้อง รับดาวจากคุณครูบนกระดานคะแนนมุมขวาบนทันที!</li>
+            </ul>`
+    };
+
+    const stageTitles = { 1: "🐊 ด่านที่ 1: ให้อาหารจระเข้จอมหิว", 2: "🚂 ด่านที่ 2: สถานีรถไฟสัตว์พาเหรด" };
+
+    function goToMenu() { document.getElementById("welcome-screen").classList.add("hidden"); document.getElementById("home-screen").classList.remove("hidden"); }
+
+    function showIntroRules(stageNum) {
+        currentStage = stageNum;
+        document.getElementById("home-screen").classList.add("hidden");
+        document.getElementById("rules-screen").classList.remove("hidden");
+        document.getElementById("rules-screen-title").innerText = stageTitles[stageNum] + " - กติกา";
+        document.getElementById("rules-content-box").innerHTML = stageRulesHTML[stageNum];
+    }
+
+    function startStageFromRules() {
+        currentIndex = 0;
+        activeQuestions = (currentStage === 1) ? stage1Questions : stage2Questions;
+        document.getElementById("rules-screen").classList.add("hidden");
+        document.getElementById("game-screen").classList.remove("hidden");
+        document.getElementById("game-title").innerText = stageTitles[currentStage];
+        
+        let scoreBtn = document.getElementById("score-toggle-btn");
+        let scorePanel = document.getElementById("score-panel");
+        if (currentStage === 2) {
+            resetScores();
+            scoreBtn.classList.remove("hidden");
+            scorePanel.classList.add("hidden");
+        } else {
+            scoreBtn.classList.add("hidden");
+            scorePanel.classList.add("hidden");
+        }
+        
+        loadQuestion();
+    }
+
+    function goHome() {
+        clearInterval(timerInterval);
+        document.getElementById("game-screen").classList.add("hidden");
+        document.getElementById("rules-screen").classList.add("hidden");
+        document.getElementById("summary-screen").classList.add("hidden");
+        document.getElementById("home-screen").classList.remove("hidden");
+        document.getElementById("score-toggle-btn").classList.add("hidden");
+        document.getElementById("score-panel").classList.add("hidden");
+    }
+
+    function showSummary() {
+        document.getElementById("game-screen").classList.add("hidden");
+        document.getElementById("score-panel").classList.add("hidden");
+        document.getElementById("score-toggle-btn").classList.add("hidden");
+        document.getElementById("summary-screen").classList.remove("hidden");
+        
+        let summaryHTML = `
+            <div class="team-card red summary-card">
+                <div class="team-name">🔴 แก๊งสิงโตจอมพลัง</div>
+                <div class="team-score">⭐ ${groupScores.red}</div>
+            </div>
+            <div class="team-card blue summary-card">
+                <div class="team-name">🔵 แก๊งเพนกวินแสนซน</div>
+                <div class="team-score">⭐ ${groupScores.blue}</div>
+            </div>
+            <div class="team-card yellow summary-card">
+                <div class="team-name">🟡 แก๊งยีราฟคอยาว</div>
+                <div class="team-score">⭐ ${groupScores.yellow}</div>
+            </div>
+            <div class="team-card green summary-card">
+                <div class="team-name">🟢 แก๊งช้างน้อยพ่นน้ำ</div>
+                <div class="team-score">⭐ ${groupScores.green}</div>
+            </div>
+        `;
+        document.getElementById("summary-results").innerHTML = summaryHTML;
+    }
+
+    function loadQuestion() {
+        clearInterval(timerInterval);
+
+        if(currentIndex >= activeQuestions.length) {
+            if (currentStage === 2) {
+                showSummary(); 
+            } else {
+                alert("🎉 ยินดีด้วยครับ! เด็กๆ ผ่านภารกิจด่านนี้ทั้งหมดแล้ว!");
+                goHome(); 
+            }
+            return;
+        }
+
+        let qData = activeQuestions[currentIndex];
+        document.getElementById("progress-text").innerText = "ข้อที่ " + (currentIndex + 1) + " จาก " + activeQuestions.length;
+        document.getElementById("level-indicator").innerText = qData.level;
+        
+        let qBox = document.getElementById("question-display");
+        let choiceBox = document.getElementById("choices-display");
+        let trainBox = document.getElementById("train-stage-display");
+        let expBox = document.getElementById("explanation");
+        let btnShow = document.getElementById("btn-show-answer");
+        let btnNext = document.getElementById("btn-next");
+        let timerContainer = document.getElementById("timer-container");
+
+        expBox.style.display = "none";
+        expBox.innerHTML = "";
+
+        if (currentStage === 1) {
+            trainBox.classList.add("hidden");
+            qBox.classList.remove("hidden");
+            qBox.innerHTML = qData.q;
+
+            if (qData.type === "choice") {
+                let choiceHTML = "<div class='choice-container'>";
+                qData.choices.forEach(c => { choiceHTML += `<button class='choice' onclick='selectOption(this)'>${c}</button>`; });
+                choiceHTML += "</div>";
+                choiceBox.innerHTML = choiceHTML;
+                choiceBox.classList.remove("hidden");
+                
+                timerContainer.classList.add("hidden");
+                btnShow.classList.add("hidden"); 
+                btnNext.disabled = false; btnNext.style.opacity = "1";
+            } else {
+                choiceBox.classList.add("hidden");
+                timerContainer.classList.remove("hidden");
+                btnShow.classList.add("hidden");
+                btnNext.disabled = true; btnNext.style.opacity = "0.5";
+                
+                timeLeft = 7; 
+                document.getElementById("timer-display").innerText = "⏱️ เวลาคิด: " + timeLeft + " วินาที";
+                timerInterval = setInterval(() => {
+                    timeLeft--; document.getElementById("timer-display").innerText = "⏱️ เวลาคิด: " + timeLeft + " วินาที";
+                    if(timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById("timer-display").innerText = "🔔 หมดเวลา! ชูไม้ไอติมเลย!!";
+                        btnShow.classList.remove("hidden"); btnNext.disabled = false; btnNext.style.opacity = "1";
+                    }
+                }, 1000);
+            }
+        } else {
+            qBox.classList.add("hidden"); choiceBox.classList.add("hidden"); timerContainer.classList.add("hidden");
+            trainBox.classList.remove("hidden");
+            
+            let animalRoster = document.getElementById("animal-roster");
+            let aHTML = "";
+            qData.items.forEach((it, idx) => {
+                aHTML += `<div class='animal-item' id='animal-${idx}'><div class='bubble'>${it.q}</div><div class='animal-emoji'>${it.a}</div><div class='pedestal' style='background:${it.c}'></div></div>`;
+            });
+            animalRoster.innerHTML = aHTML;
+
+            let trainTrack = document.getElementById("train-track");
+            let tHTML = "<div class='train-engine'>🚂</div>";
+            qData.items.forEach((_, idx) => {
+                tHTML += `<div class='train-cart' id='cart-${idx}'></div>`;
+            });
+            trainTrack.innerHTML = tHTML;
+
+            btnShow.classList.remove("hidden"); btnNext.disabled = false; btnNext.style.opacity = "1";
+        }
+    }
+
+    function selectOption(selectedButton) {
+        document.querySelectorAll('.choice').forEach(btn => btn.style.pointerEvents = 'none');
+        selectedButton.classList.add('selected');
+        showAnswer();
+    }
+
+    function showAnswer() {
+        let qData = activeQuestions[currentIndex];
+        let expBox = document.getElementById("explanation");
+        expBox.innerHTML = qData.ans;
+        expBox.style.display = "block";
+        document.getElementById("btn-show-answer").classList.remove("hidden");
+
+        if (currentStage === 2) {
+            qData.ansOrder.forEach((originalIdx, cartIdx) => {
+                let cart = document.getElementById(`cart-${cartIdx}`);
+                let item = qData.items[originalIdx];
+                setTimeout(() => {
+                    cart.innerHTML = `<div class='animal-in-cart'>${item.a}</div><div class='cart-color-band' style='background:${item.c}'></div>`;
+                    document.getElementById(`animal-${originalIdx}`).style.opacity = "0.2"; 
+                }, cartIdx * 600);
+            });
+        }
+    }
+
+    function nextQuestion() { currentIndex++; loadQuestion(); }
+</script>
+
+</body>
+</html>
